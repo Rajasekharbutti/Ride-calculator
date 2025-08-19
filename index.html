@@ -3,55 +3,62 @@
 <head>
   <title>Rohan-Ride Calculator</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      background: #f9f9f9;
-      color: #333;
+      font-family: 'Poppins', sans-serif;
+      padding: 40px;
+      background: #f1f5f9;
+      color: #334155;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
     h1 {
-      color: #007bff;
-      text-align: center;
+      color: #0f62fe;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
     }
     input, button {
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px 0;
+      padding: 12px;
+      font-size: 15px;
+      margin: 8px 0;
       width: 100%;
-      max-width: 400px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      max-width: 420px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     button {
       cursor: pointer;
-      background-color: #007bff;
+      background-color: #0f62fe;
       color: white;
       border: none;
+      transition: background-color 0.25s;
     }
     button:hover {
-      background-color: #0056b3;
+      background-color: #0043ce;
     }
     #results {
-      margin-top: 20px;
-      font-weight: bold;
-      color: #333;
+      margin-top: 25px;
+      font-weight: 600;
       text-align: center;
+      line-height: 1.6;
     }
     #whatsappLink {
-      margin-top: 10px;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
   <h1>Rohan-Ride Calculator</h1>
+
   <input id="origin" placeholder="Enter pickup location" />
   <input id="destination" placeholder="Enter drop location" />
   <input id="pickupTime" type="datetime-local" placeholder="Preferred Pickup Time" />
   <input id="dropTime" type="datetime-local" placeholder="Preferred Drop Time" />
   <button onclick="calculateFare()">Calculate Fare</button>
+
   <div id="results"></div>
   <div id="whatsappLink"></div>
 
@@ -91,31 +98,32 @@
         function (response, status) {
           if (status !== 'OK') {
             alert('Error: ' + status);
-          } else {
-            const result = response.rows[0].elements[0];
-            if (result.status !== 'OK') {
-              alert('Error fetching distance or time.');
-              return;
-            }
-
-            const distanceText = result.distance.text;
-            const durationText = result.duration_in_traffic ? result.duration_in_traffic.text : result.duration.text;
-            const distanceMiles = parseFloat(result.distance.text.replace(' mi', ''));
-            const durationMinutes = parseFloat(durationText.replace(' mins', ''));
-
-            const totalFare = (baseFare + (distanceMiles * perMile) + (durationMinutes * perMinute)).toFixed(2);
-
-            const message = `Fare Estimate:\nPickup: ${origin}\nDrop: ${destination}\nPickup Time: ${pickupTime}\nDrop Time: ${dropTime}\nDistance: ${distanceText}\nTime: ${durationText}\nFare: $${totalFare}`;
-            const whatsappUrl = `https://wa.me/13129665650?text=${encodeURIComponent(message)}`;
-
-            document.getElementById("results").innerHTML =
-              `Distance: ${distanceText}<br>
-               Time (with traffic): ${durationText}<br>
-               Estimated Fare: $${totalFare}`;
-
-            document.getElementById("whatsappLink").innerHTML =
-              `<a href="${whatsappUrl}" target="_blank"><button>Send to WhatsApp</button></a>`;
+            return;
           }
+          const result = response.rows[0].elements[0];
+          if (result.status !== 'OK') {
+            alert('Error fetching distance or time.');
+            return;
+          }
+
+          const distanceText = result.distance.text;
+          const durationText = result.duration_in_traffic ? result.duration_in_traffic.text : result.duration.text;
+
+          const distanceMiles = parseFloat(result.distance.text.replace(' mi', ''));
+          const durationMinutes = parseFloat(durationText.replace(' mins', ''));
+
+          const totalFare = (baseFare + (distanceMiles * perMile) + (durationMinutes * perMinute)).toFixed(2);
+
+          document.getElementById("results").innerHTML =
+            `Distance: ${distanceText}<br>
+             Time (with traffic): ${durationText}`;  // Fare intentionally hidden here
+
+          const message =
+            `Fare Estimate:\nPickup: ${origin}\nDrop: ${destination}\nPickup Time: ${pickupTime}\nDrop Time: ${dropTime}\nDistance: ${distanceText}\nTime: ${durationText}\nFare: $${totalFare}`;
+
+          const whatsappUrl = `https://wa.me/13129665650?text=${encodeURIComponent(message)}`;
+          document.getElementById("whatsappLink").innerHTML =
+            `<a href="${whatsappUrl}" target="_blank"><button>Send to WhatsApp</button></a>`;
         }
       );
     }
